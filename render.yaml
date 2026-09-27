@@ -1,0 +1,43 @@
+services:
+  # 1. Express REST API Web Service
+  - type: web
+    name: reachinbox-api
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:api
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+
+  # 2. BullMQ Background Worker Service
+  - type: worker
+    name: reachinbox-worker
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: WORKER_CONCURRENCY
+        value: "5"
+      - key: MIN_EMAIL_DELAY_MS
+        value: "2000"
+      - key: MAX_EMAILS_PER_HOUR
+        value: "100"
