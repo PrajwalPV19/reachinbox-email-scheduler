@@ -163,9 +163,9 @@ export class CampaignService {
     // Enqueue BullMQ delayed jobs
     try {
       await QueueService.addEmailJobsBulk(queueJobsPayload);
-    } catch (queueErr) {
-      logger.error({ queueErr, campaignId }, 'Failed to add jobs to BullMQ');
-      throw new Error('Failed to register delayed jobs with message queue');
+    } catch (queueErr: any) {
+      logger.error({ error: queueErr?.message || queueErr, campaignId }, 'Failed to add jobs to BullMQ');
+      throw new Error(`Failed to register delayed jobs with message queue: ${queueErr?.message || 'Queue error'}`);
     }
 
     // Index into Elasticsearch asynchronously (non-blocking)

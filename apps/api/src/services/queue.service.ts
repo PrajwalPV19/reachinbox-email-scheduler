@@ -68,9 +68,19 @@ export class QueueService {
       },
     }));
 
-    const queuedJobs = await emailQueue.addBulk(jobs);
-    logger.info({ count: queuedJobs.length }, 'Bulk queued email jobs');
-    return queuedJobs.map((j) => j.id!);
+    try {
+      const queuedJobs = await emailQueue.addBulk(jobs);
+      logger.info({ count: queuedJobs.length }, 'Bulk queued email jobs');
+      return queuedJobs.map((j) => j.id!);
+    } catch (bulkErr: any) {
+      logger.warn({ error: bulkErr?.message || bulkErr }, 'addBulk failed, attempting individual job scheduling fallback');
+      const jobIds: string[] = [];
+      for (const item of items) {
+        const id = await this.addEmailJob(item.data, item.delayMs);
+        jobIds.push(id);
+      }
+      return jobIds;
+    }
   }
 
   public static async getQueueCounts() {
