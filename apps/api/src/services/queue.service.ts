@@ -47,7 +47,7 @@ export const emailQueue = new Queue<EmailJobData>(QUEUE_NAMES.EMAIL_QUEUE, {
 
 export class QueueService {
   public static async addEmailJob(data: EmailJobData, delayMs: number): Promise<string> {
-    const jobId = `email:${data.emailId}`;
+    const jobId = `email_${data.emailId}`;
     const job = await emailQueue.add('send-email', data, {
       jobId,
       delay: Math.max(0, delayMs),
@@ -63,7 +63,7 @@ export class QueueService {
       name: 'send-email',
       data: item.data,
       opts: {
-        jobId: `email:${item.data.emailId}`,
+        jobId: `email_${item.data.emailId}`,
         delay: Math.max(0, item.delayMs),
       },
     }));
