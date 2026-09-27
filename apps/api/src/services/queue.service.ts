@@ -7,13 +7,21 @@ import { config } from '../config';
 import { logger } from '../utils/logger';
 import { QUEUE_NAMES, EmailJobData } from '@reachinbox/shared';
 
-export const redisConnection = new Redis({
-  host: config.redis.host,
-  port: config.redis.port,
-  password: config.redis.password,
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
+const isTls = config.redis.url.startsWith('rediss://');
+
+export const redisConnection = config.redis.url && config.redis.url !== 'redis://localhost:6379'
+  ? new Redis(config.redis.url, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      tls: isTls ? { rejectUnauthorized: false } : undefined,
+    })
+  : new Redis({
+      host: config.redis.host,
+      port: config.redis.port,
+      password: config.redis.password,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    });
 
 redisConnection.on('error', (err) => {
   logger.error({ err }, 'Redis connection error');

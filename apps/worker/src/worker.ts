@@ -6,13 +6,21 @@ import { EmailProcessor } from './processors/email.processor';
 import { QUEUE_NAMES, EmailJobData } from '@reachinbox/shared';
 import { pool } from './db/client';
 
-const redisClient = new Redis({
-  host: config.redis.host,
-  port: config.redis.port,
-  password: config.redis.password,
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
+const isTls = config.redis.url.startsWith('rediss://');
+
+const redisClient = config.redis.url && config.redis.url !== 'redis://localhost:6379'
+  ? new Redis(config.redis.url, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+      tls: isTls ? { rejectUnauthorized: false } : undefined,
+    })
+  : new Redis({
+      host: config.redis.host,
+      port: config.redis.port,
+      password: config.redis.password,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    });
 
 const processor = new EmailProcessor(redisClient);
 

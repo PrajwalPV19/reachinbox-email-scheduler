@@ -2,8 +2,11 @@ import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 
+const isCloudDb = config.db.url.includes('neon.tech') || config.db.url.includes('sslmode=') || process.env.NODE_ENV === 'production';
+
 export const pool = new Pool({
   connectionString: config.db.url,
+  ssl: isCloudDb ? { rejectUnauthorized: false } : undefined,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
