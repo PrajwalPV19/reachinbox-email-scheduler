@@ -12,3 +12,6 @@ coverage/
 .turbo/
 *.zip
 downloads/
+scripts/init-neon.ts
+
+.vercel

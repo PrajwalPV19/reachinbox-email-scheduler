@@ -22,9 +22,15 @@ export const createApp = (): express.Application => {
     })
   );
 
+  const allowedOrigins = [
+    config.frontendUrl,
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ].filter((v, i, a) => a.indexOf(v) === i); // deduplicate
+
   app.use(
     cors({
-      origin: [config.frontendUrl, 'http://localhost:3000', 'http://localhost:5173'],
+      origin: allowedOrigins,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
